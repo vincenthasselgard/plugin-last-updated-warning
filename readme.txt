@@ -5,7 +5,7 @@ Tags: plugins, administration, plugin management
 Requires at least: 5.3
 Tested up to: 5.3
 Requires PHP: 5.6
-Stable tag: 0.9.0
+Stable tag: 0.9.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,12 @@ If you find it cumbersome to manually check if installed plugins have received u
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+= 0.9.1 =
+
+- Added comments to the code.
+- Plugin is now translation ready.
+- Added Norwegian (Bokmål) translation.
 
 = 0.9.0 =
 
