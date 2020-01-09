@@ -88,7 +88,7 @@ if( !class_exists('Plugin_Last_Updated_Warning') ) {
                                     <div class="notice inline notice-warning notice-alt">
                                         <p>' 
                         );
-                                        echo sprintf( __( 'It looks like %1$s hasn\'t received updated in the last %2$d year(s). It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'plugin-last-updated-warning' ), $plugin_data['Name'], $last_updated );
+                                        echo sprintf( __( 'It looks like %1$s hasn\'t received updates in the last %2$d year(s). It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'plugin-last-updated-warning' ), $plugin_data['Name'], $last_updated );
                                         
                         printf(         
                                         '</p>
