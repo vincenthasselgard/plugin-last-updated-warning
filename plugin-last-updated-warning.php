@@ -7,7 +7,7 @@
  * Author URI:      https://vincenthasselgard.no
  * Text Domain:     plugin-last-updated-warning
  * Domain Path:     /languages
- * Version:         0.9.0
+ * Version:         0.9.1
  *
  * @package         Plugin_Last_Updated_Warning
  */
@@ -20,14 +20,28 @@ if( !class_exists('Plugin_Last_Updated_Warning') ) {
 
         public static function init(){
 
+            /**
+             * Retrieves numbers of years since last plugin update on WP.org
+             * 
+             * @since 0.1.0
+             * 
+             * @param string $plugin_slug   The slug of the plugin that is being checked. Must match plugin slug on WP.org.
+             * 
+             */
+            
             function get_last_updated_date($plugin_slug){
-                
+ 
                 $action = 'plugin_information';
                 $args = array(
                     'slug' => $plugin_slug
                 );
 
                 $url = 'http://api.wordpress.org/plugins/info/1.2/';
+                $ssl = wp_http_supports( array( 'ssl' ) );
+                
+                if ( $ssl ) {
+                    $url = set_url_scheme( $url, 'https' );
+                }
 
                 $url = add_query_arg(
                     array(
@@ -37,22 +51,15 @@ if( !class_exists('Plugin_Last_Updated_Warning') ) {
                     $url
                 );
 
-                $http_url = $url;
-                $ssl      = wp_http_supports( array( 'ssl' ) );
-                if ( $ssl ) {
-                    $url = set_url_scheme( $url, 'https' );
-                }
-
                 $http_args = array(
                     'timeout'    => 15,
                     'user-agent' => 'WordPress;' . home_url( '/' ),
                 );
 
                 $request = wp_remote_get( $url, $http_args );
-                $plugins_info = json_decode($request['body']);
+                $plugin_info = json_decode($request['body']);
 
-                $plugin_last_update = new \DateTime($plugins_info->last_updated);
-
+                $plugin_last_update = new \DateTime($plugin_info->last_updated);
                 $today = new \DateTime( date('Y-m-d', time() ) ); // use to get a return of number of years since update
 
                 $diff = $today->diff($plugin_last_update);
@@ -61,7 +68,17 @@ if( !class_exists('Plugin_Last_Updated_Warning') ) {
 
             }
 
-            function add_plugin_warning($plugin_file, $plugin_data, $status){
+            /**
+             * Adds a warning for every plugin which has not received an update in the past year.
+             * 
+             * @since 0.1.0
+             * 
+             * @param string $plugin_file   String with directory and filename for plugin. IE 'akismet/akismet.php'
+             * @param string $plugin_data   Array that contains plugin data.
+             * 
+             */
+
+            function add_plugin_warning($plugin_file, $plugin_data){
                 if( isset($plugin_data['slug'] ) ){
                     $last_updated = get_last_updated_date($plugin_data['slug']);
                     if( $last_updated > 0 ) {
@@ -69,9 +86,12 @@ if( !class_exists('Plugin_Last_Updated_Warning') ) {
                             '<tr class="plugin-old-tr">
                                 <td colspan="3" class="plugin-old colspanchange">
                                     <div class="notice inline notice-warning notice-alt">
-                                        <p>' .
-                                        __( 'It looks like ' . $plugin_data['Name'] . ' hasn\'t received updated in the last ' . $last_updated .' year(s). It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'plugin-last-updated-warning' )
-                                        . '</p>
+                                        <p>' 
+                        );
+                                        echo sprintf( __( 'It looks like %1$s hasn\'t received updated in the last %2$d year(s). It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'plugin-last-updated-warning' ), $plugin_data['Name'], $last_updated );
+                                        
+                        printf(         
+                                        '</p>
                                     </div>
                                 </td>
                             </tr>'
@@ -79,6 +99,13 @@ if( !class_exists('Plugin_Last_Updated_Warning') ) {
                     }
                 }
             }
+
+            /**
+             * Does a foreach loop to check all installed plugins.
+             * 
+             * @since 0.1.0
+             * 
+             */
 
             function get_all_plugins(){
                 $plugins = \get_plugins();
